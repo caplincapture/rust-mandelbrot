@@ -18,9 +18,8 @@ fn escape_time(c: Complex<f64>, limit: usize) -> Option<usize> {
         if z.norm_sqr() > 4.0 {
             return Some(i);
         }
-        z = z * z + c;
+        z = z * z + c
     }
-
     None
 }
 
@@ -35,7 +34,16 @@ use std::str::FromStr;
 /// If `s` has the proper form, return `Some<(x, y)>`. If it doesn't parse
 /// correctly, return `None`.
 fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
-    
+/*     match s.find(separator) {
+        None => None,
+
+    } */
+    let mut split = s.split(separator);
+    match (split.next().unwrap().parse::<T>(), split.next().unwrap().parse::<T>()) {
+        (Ok(left), Ok(right)) => Some((left, right)),
+        (Err(left), _) => None,
+        (_,Err(Right)) => None
+    }
 }
 
 #[test]
