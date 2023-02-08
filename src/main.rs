@@ -149,10 +149,15 @@ use std::fs::File;
 
 /// Write the buffer `pixels`, whose dimensions are given by `bounds`, to the
 /// file named `filename`.
+
 fn write_image(filename: &str, pixels: &[u8], bounds: (usize, usize))
     -> Result<(), std::io::Error>
-{
-    
+{   
+    let output = File::create(filename)?;
+    let mut encoder = PNGEncoder::new(output);
+    encoder.encode(pixels, bounds.0 as u32, bounds.1 as u32, ColorType::RGBA(2))?;
+
+    Ok(())
 }
 
 use std::env;
