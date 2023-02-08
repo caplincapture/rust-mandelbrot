@@ -64,7 +64,19 @@ fn test_parse_pair() {
 /// Parse a pair of floating-point numbers separated by a comma as a complex
 /// number.
 fn parse_complex(s: &str) -> Option<Complex<f64>> {
-    
+    /* match s.find(",") {
+        Some(index) => {
+            match (f64::from_str(&s[..index]), f64::from_str(&s[index+1..])) {
+                (Ok(l), Ok(r)) => Some(Complex {re:l, im: r}),
+                _ => None
+            }
+        }
+        None => None
+    } */
+    match parse_pair(s, ',') {
+        Some((l,r)) => Some(Complex{re: l, im: r}),
+        _ => None
+    }
 }
 
 #[test]
@@ -121,6 +133,8 @@ fn render(pixels: &mut [u8],
     for row in 0..bounds.1 {
         for column in 0..bounds.0 {
             
+            offset u8 = row * column % column;
+            pixels[row, column]
         }
     }
 }
