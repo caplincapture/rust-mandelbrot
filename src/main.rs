@@ -33,7 +33,7 @@ use std::str::FromStr;
 ///
 /// If `s` has the proper form, return `Some<(x, y)>`. If it doesn't parse
 /// correctly, return `None`.
-fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
+fn parse_string_function_prototype<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
 /*     let mut split = s.split(separator);
 
     match (split.next().unwrap().parse::<T>(), split.next().unwrap().parse::<T>()) {
@@ -51,14 +51,14 @@ fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
 }
 
 #[test]
-fn test_parse_pair() {
-    assert_eq!(parse_pair::<i32>("",        ','), None);
-    assert_eq!(parse_pair::<i32>("10,",     ','), None);
-    assert_eq!(parse_pair::<i32>(",10",     ','), None);
-    assert_eq!(parse_pair::<i32>("10,20",   ','), Some((10, 20)));
-    assert_eq!(parse_pair::<i32>("10,20xy", ','), None);
-    assert_eq!(parse_pair::<f64>("0.5x",    'x'), None);
-    assert_eq!(parse_pair::<f64>("0.5x1.5", 'x'), Some((0.5, 1.5)));
+fn test_parse_string_function_prototype() {
+    assert_eq!(parse_string_function_prototype::<i32>("",        ','), None);
+    assert_eq!(parse_string_function_prototype::<i32>("10,",     ','), None);
+    assert_eq!(parse_string_function_prototype::<i32>(",10",     ','), None);
+    assert_eq!(parse_string_function_prototype::<i32>("10,20",   ','), Some((10, 20)));
+    assert_eq!(parse_string_function_prototype::<i32>("10,20xy", ','), None);
+    assert_eq!(parse_string_function_prototype::<f64>("0.5x",    'x'), None);
+    assert_eq!(parse_string_function_prototype::<f64>("0.5x1.5", 'x'), Some((0.5, 1.5)));
 }
 
 /// Parse a pair of floating-point numbers separated by a comma as a complex
@@ -73,7 +73,7 @@ fn parse_complex(s: &str) -> Option<Complex<f64>> {
         }
         None => None
     } */
-    match parse_pair(s, ',') {
+    match parse_string_function_prototype(s, ',') {
         Some((l,r)) => Some(Complex{re: l, im: r}),
         _ => None
     }
@@ -132,9 +132,13 @@ fn render(pixels: &mut [u8],
 
     for row in 0..bounds.1 {
         for column in 0..bounds.0 {
-            
-            offset u8 = row * column % column;
-            pixels[row, column]
+            let point = pixel_to_point(bounds, (column, row),
+                                       upper_left, lower_right);
+            pixels[row * bounds.0 + column] =
+                match escape_time(point, 255) {
+                    None => 0,
+                    Some(count) => 255 - count as u8
+                };
         }
     }
 }
@@ -148,14 +152,7 @@ use std::fs::File;
 fn write_image(filename: &str, pixels: &[u8], bounds: (usize, usize))
     -> Result<(), std::io::Error>
 {
-    let output = File::create(filename)?;
-
-    let encoder = PNGEncoder::new(output);
-    encoder.encode(&pixels,
-                   bounds.0 as u32, bounds.1 as u32,
-                   ColorType::Gray(8))?;
-
-    Ok(())
+    
 }
 
 use std::env;
@@ -171,7 +168,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    let bounds = parse_pair(&args[2], 'x')
+    let bounds = parse_string_function_prototype(&args[2], 'x')
         .expect("error parsing image dimensions");
     let upper_left = parse_complex(&args[3])
         .expect("error parsing upper left corner point");
